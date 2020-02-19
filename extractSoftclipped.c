@@ -19,13 +19,12 @@ void process_alignment(bam1_t *b, bam_hdr_t *hdr, FILE *of, int length) {
             if(bam_cigar_type(op)&2) pos += op_len;
             if(bam_cigar_type(op)&1) apos += op_len;
         } else {
-            fprintf(of, "@%s:%"PRId32"\n", hdr->target_name[b->core.tid], pos);
+            fprintf(of, ">%s_%s_%i_%"PRId32"_", bam_get_qname(b), hdr->target_name[b->core.tid], b->core.flag, pos+1);
+            for(j=0; j<b->core.n_cigar; j++)
+                fprintf(of, "%i%c", bam_cigar_oplen(cigar[j]), BAM_CIGAR_STR[bam_cigar_op(cigar[j])]);
+            fprintf(of, "\n");
             for(j=0; j < op_len; j++) {
                 fprintf(of, "%c", int2char[bam_seqi(bam_get_seq(b), j+apos)]);
-            }
-            fprintf(of, "\n+\n");
-            for(j=0; j < op_len; j++) {
-                fprintf(of, "%c", bam_get_qual(b)[j+apos]+33);
             }
             fprintf(of, "\n");
         }
